@@ -174,5 +174,5 @@ def server_error(e):
 if __name__ == '__main__':
     print(f"Template folder: {os.path.join(BASE_DIR, 'templates')}")
     print(f"Static folder: {os.path.join(BASE_DIR, 'static')}")
-    print("Starting Flask app on http://localhost:5000")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    print("Starting Flask app on http://localhost:3000")
+    app.run(debug=True, host='0.0.0.0', port=3000)
