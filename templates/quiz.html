@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Finance Flashcards - Quiz{% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+    <div class="quiz-header">
+        <div class="progress-info">
+            <span id="question-number">Question 1</span> / 20
+        </div>
+        <div class="score-display">
+            Score: <span id="score">0</span>/20
+        </div>
+    </div>
+    
+    <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill"></div>
+    </div>
+    
+    <div class="question-card">
+        <h2 id="question-text"></h2>
+        
+        <div id="choices-container" class="choices-container">
+            <!-- Choices will be loaded here by JavaScript -->
+        </div>
+        
+        <div id="feedback" class="feedback"></div>
+        
+        <div class="button-group">
+            <button id="submit-btn" class="btn btn-primary" onclick="submitAnswer()">Submit Answer</button>
+            <button id="next-btn" class="btn btn-secondary" onclick="nextQuestion()" style="display:none;">Next Question</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentQuestion = null;
+    let quizData = null;
+    
+    // Load the current question when the page loads
+    window.addEventListener('load', function() {
+        loadQuestion();
+    });
+    
+    function loadQuestion() {
+        fetch('/api/question')
+            .then(response => response.json())
+            .then(data => {
+                currentQuestion = data;
+                quizData = data;
+                
+                // Update question number and score
+                document.getElementById('question-number').textContent = `Question ${data.question_num}`;
+                document.getElementById('score').textContent = data.score;
+                
+                // Update progress bar
+                const progress = (data.question_num / data.total_questions) * 100;
+                document.getElementById('progress-fill').style.width = progress + '%';
+                
+                // Display question
+                document.getElementById('question-text').textContent = data.question;
+                
+                // Display choices
+                const choicesContainer = document.getElementById('choices-container');
+                choicesContainer.innerHTML = '';
+                
+                data.choices.forEach((choice, index) => {
+                    const choiceDiv = document.createElement('div');
+                    choiceDiv.className = 'choice';
+                    choiceDiv.innerHTML = `
+                        <input type="radio" id="choice${index}" name="answer" value="${choice}" onchange="selectAnswer('${choice}')">
+                        <label for="choice${index}">${choice}</label>
+                    `;
+                    choicesContainer.appendChild(choiceDiv);
+                }))
+                
+                // Clear feedback
+                document.getElementById('feedback').innerHTML = '';
+                document.getElementById('submit-btn').style.display = 'block';
+                document.getElementById('next-btn').style.display = 'none';
+                
+                // If already answered, show result
+                if (data.answered) {
+                    showAnswerResult(data.selected_answer);
+                }
+            });
+    }
+    
+    function selectAnswer(answer) {
+        // Just update selection
+    }
+    
+    function submitAnswer() {
+        const selectedAnswer = document.querySelector('input[name="answer"]:checked');
+        
+        if (!selectedAnswer) {
+            alert('Please select an answer');
+            return;
+        }
+        
+        const answer = selectedAnswer.value;
+        
+        fetch('/api/answer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({answer: answer})
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('score').textContent = data.score;
+            showAnswerResult(answer);
+        });
+    }
+    
+    function showAnswerResult(selectedAnswer) {
+        const feedback = document.getElementById('feedback');
+        const correctAnswer = currentQuestion.correct_answer;
+        const isCorrect = selectedAnswer === correctAnswer;
+        
+        if (isCorrect) {
+            feedback.innerHTML = '<div class="feedback-correct">✓ Correct!</div>';
+            feedback.className = 'feedback feedback-correct';
+        } else {
+            feedback.innerHTML = `<div class="feedback-incorrect">✗ Incorrect!<br>Correct answer: ${correctAnswer}</div>`;
+            feedback.className = 'feedback feedback-incorrect';
+        }
+        
+        // Disable submit button and show next button
+        document.getElementById('submit-btn').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'block';
+        
+        // Disable all radio buttons
+        document.querySelectorAll('input[name="answer"]').forEach(radio => {
+            radio.disabled = true;
+        });
+    }
+    
+    function nextQuestion() {
+        fetch('/api/next')
+            .then(response => response.json())
+            .then(data => {
+                if (data.quiz_completed) {
+                    // Redirect to results page
+                    window.location.href = '/results';
+                } else {
+                    // Load next question
+                    loadQuestion();
+                }
+            });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Finance Flashcards - Home{% endblock %}
+
+{% block content %}
+<div class="home-content">
+    <div class="welcome-card">
+        <h2>Welcome to Finance Flashcards!</h2>
+        <p>Challenge yourself with 20 random finance questions and test your knowledge of stocks, bonds, economics, and more.</p>
+        
+        <div class="features">
+            <div class="feature">
+                <span class="emoji">❓</span>
+                <h3>20 Random Questions</h3>
+                <p>Each quiz features 20 unique questions randomly selected from our finance database.</p>
+            </div>
+            
+            <div class="feature">
+                <span class="emoji">🎯</span>
+                <h3>Multiple Choice</h3>
+                <p>Each question has 4 options: 1 correct answer and 3 plausible alternatives.</p>
+            </div>
+            
+            <div class="feature">
+                <span class="emoji">📊</span>
+                <h3>Real-Time Scoring</h3>
+                <p>Watch your score update as you answer each question correctly.</p>
+            </div>
+        </div>
+        
+        <div class="cta">
+            <a href="/start_quiz" class="btn btn-primary btn-large">Start Quiz</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
