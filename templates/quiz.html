@@ -39,13 +39,26 @@
     
     // Load the current question when the page loads
     window.addEventListener('load', function() {
+        console.log('Page loaded, fetching first question...');
         loadQuestion();
     });
     
     function loadQuestion() {
+        console.log('Loading question...');
         fetch('/api/question')
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('Question data received:', data);
+                
+                if (data.error) {
+                    console.error('Error from server:', data.error);
+                    alert('Error loading question: ' + data.error);
+                    return;
+                }
+                
                 currentQuestion = data;
                 quizData = data;
                 
@@ -72,7 +85,7 @@
                         <label for="choice${index}">${choice}</label>
                     `;
                     choicesContainer.appendChild(choiceDiv);
-                }))
+                });
                 
                 // Clear feedback
                 document.getElementById('feedback').innerHTML = '';
@@ -83,6 +96,10 @@
                 if (data.answered) {
                     showAnswerResult(data.selected_answer);
                 }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('Error loading question: ' + error.message);
             });
     }
     
@@ -99,6 +116,7 @@
         }
         
         const answer = selectedAnswer.value;
+        console.log('Submitting answer:', answer);
         
         fetch('/api/answer', {
             method: 'POST',
@@ -109,8 +127,13 @@
         })
         .then(response => response.json())
         .then(data => {
+            console.log('Answer response:', data);
             document.getElementById('score').textContent = data.score;
             showAnswerResult(answer);
+        })
+        .catch(error => {
+            console.error('Submit error:', error);
+            alert('Error submitting answer: ' + error.message);
         });
     }
     
@@ -138,9 +161,11 @@
     }
     
     function nextQuestion() {
+        console.log('Moving to next question...');
         fetch('/api/next')
             .then(response => response.json())
             .then(data => {
+                console.log('Next response:', data);
                 if (data.quiz_completed) {
                     // Redirect to results page
                     window.location.href = '/results';
@@ -148,6 +173,10 @@
                     // Load next question
                     loadQuestion();
                 }
+            })
+            .catch(error => {
+                console.error('Next error:', error);
+                alert('Error loading next question: ' + error.message);
             });
     }
 </script>
