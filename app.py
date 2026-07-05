@@ -1,18 +1,36 @@
 from flask import Flask, render_template, request, session, jsonify
 import json
 import random
+import os
 from datetime import timedelta
 
-app = Flask(__name__)
+# Get the absolute path to the app directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(__name__, 
+            template_folder=os.path.join(BASE_DIR, 'templates'),
+            static_folder=os.path.join(BASE_DIR, 'static'))
 app.secret_key = 'your-secret-key-change-this'
 app.permanent_session_lifetime = timedelta(hours=1)
 
 # Load finance facts
-with open('finance_facts.json', 'r') as f:
-    all_facts = json.load(f)
+facts_file = os.path.join(BASE_DIR, 'finance_facts.json')
+print(f"Loading facts from: {facts_file}")
+print(f"File exists: {os.path.exists(facts_file)}")
+
+try:
+    with open(facts_file, 'r') as f:
+        all_facts = json.load(f)
+    print(f"Successfully loaded {len(all_facts)} finance facts")
+except Exception as e:
+    print(f"ERROR loading finance_facts.json: {e}")
+    all_facts = []
 
 def load_quiz_questions(num_questions=20):
     """Load random questions for the quiz"""
+    if not all_facts:
+        return []
+    
     selected_facts = random.sample(all_facts, min(num_questions, len(all_facts)))
     quiz_questions = []
     
@@ -32,11 +50,13 @@ def load_quiz_questions(num_questions=20):
 @app.route('/')
 def index():
     """Home page"""
+    print("Route: /")
     return render_template('index.html')
 
 @app.route('/start_quiz')
 def start_quiz():
     """Start a new quiz session"""
+    print("Route: /start_quiz")
     session.permanent = True
     quiz_questions = load_quiz_questions(20)
     session['quiz_questions'] = quiz_questions
@@ -143,5 +163,16 @@ def results():
                          total=total,
                          percentage=percentage)
 
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({'error': 'Page not found'}), 404
+
+@app.errorhandler(500)
+def server_error(e):
+    return jsonify({'error': 'Server error', 'message': str(e)}), 500
+
 if __name__ == '__main__':
-    app.run(debug=True, host='localhost', port=5000)
+    print(f"Template folder: {os.path.join(BASE_DIR, 'templates')}")
+    print(f"Static folder: {os.path.join(BASE_DIR, 'static')}")
+    print("Starting Flask app on http://localhost:5000")
+    app.run(debug=True, host='0.0.0.0', port=5000)
