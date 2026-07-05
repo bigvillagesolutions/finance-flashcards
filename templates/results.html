@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 
-{% block title %}Finance Flashcards - Results{% endblock %}
-
 {% block content %}
 <div class="results-container">
     <div class="results-card">
@@ -10,44 +8,29 @@
         <div class="results-score">
             <div class="score-circle">
                 <div class="score-number">{{ score }}/{{ total }}</div>
-                <div class="score-percentage">{{ "%.1f"|format(percentage) }}%</div>
+                <div class="score-percentage">{{ pct }}%</div>
             </div>
         </div>
         
         <div class="results-message">
-            {% if percentage >= 90 %}
+            {% if pct >= 90 %}
                 <h3>Outstanding! 🌟</h3>
-                <p>You're a finance expert! You have excellent knowledge of financial concepts and markets.</p>
-            {% elif percentage >= 70 %}
+                <p>You're a finance expert!</p>
+            {% elif pct >= 70 %}
                 <h3>Great Job! 👏</h3>
-                <p>You demonstrated strong understanding of finance. Keep building on your knowledge!</p>
-            {% elif percentage >= 50 %}
+                <p>Strong understanding of finance!</p>
+            {% elif pct >= 50 %}
                 <h3>Good Effort! 💪</h3>
-                <p>You got the basics down. Continue learning to improve your finance knowledge.</p>
+                <p>Keep learning to improve!</p>
             {% else %}
                 <h3>Keep Learning! 📚</h3>
-                <p>Finance is complex. Take another quiz to strengthen your understanding!</p>
+                <p>Take another quiz to strengthen your knowledge!</p>
             {% endif %}
-        </div>
-        
-        <div class="results-breakdown">
-            <div class="breakdown-item">
-                <span class="breakdown-label">Correct Answers</span>
-                <span class="breakdown-value correct">{{ score }}</span>
-            </div>
-            <div class="breakdown-item">
-                <span class="breakdown-label">Incorrect Answers</span>
-                <span class="breakdown-value incorrect">{{ total - score }}</span>
-            </div>
-            <div class="breakdown-item">
-                <span class="breakdown-label">Success Rate</span>
-                <span class="breakdown-value">{{ "%.1f"|format(percentage) }}%</span>
-            </div>
         </div>
         
         <div class="cta">
             <a href="/" class="btn btn-primary">Back to Home</a>
-            <a href="/start_quiz" class="btn btn-secondary">Take Another Quiz</a>
+            <a href="/start_quiz" class="btn btn-secondary">Try Again</a>
         </div>
     </div>
 </div>
